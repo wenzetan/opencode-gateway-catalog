@@ -24,10 +24,17 @@
 
 ### 维护状态（请先读这一段）
 
+- **仅支持 OpenCode v2**：本仓库的插件不支持 OpenCode v1 及更早版本，详见下方[「兼容性」](#兼容性)。
 - 本仓库是**个人自用项目**，我**不会积极开发**它：没有路线图，没有发布计划，功能以我自己的使用场景为准。
 - **我不处理 Issues**：新开的 Issue 可能长期无人回复，也可能被直接关闭。有需求请直接提 **Pull Request**。
 - 不提供技术支持，不承诺修复时间，不保证向后兼容；随时可能推倒重写、暂停或归档。
 - 目前处于早期阶段，**尚未发布任何可用的插件或版本**。下面的「安装/使用」章节等有实际产物后再补。
+
+### 兼容性
+
+- 本仓库的插件**只支持 OpenCode v2**；OpenCode v1 及更早版本**不在支持范围内**。
+- 在 v1 上安装或加载本仓库的插件可能直接报错，也可能静默失效，这类问题不会被处理。
+- 如果支持范围有变化（例如扩大到其他版本），会直接更新在本 README 中。
 
 ### 与 OpenCode 官方的关系
 
@@ -45,7 +52,7 @@ OpenCode 官方在其主仓库 README 的 [Building on OpenCode](https://github.
 
 ### 安装 / 使用
 
-尚未发布，待补充。
+尚未发布，待补充。本仓库的插件要求 OpenCode v2，见[「兼容性」](#兼容性)。
 
 ### 贡献
 
@@ -72,10 +79,17 @@ The intended direction is hooking a self-hosted / third-party LLM gateway's mode
 
 ### Maintenance status (read this first)
 
+- **OpenCode v2 only**: the plugins here do not support OpenCode v1 or earlier. See [Compatibility](#compatibility) below.
 - This is a **personal project** and I **do not actively develop it**: no roadmap, no release schedule, features follow my own use cases.
 - **I do not handle issues.** New issues may go unanswered for a long time or be closed outright. If you need something, send a **Pull Request**.
 - No support, no fix-time commitments, no backward-compatibility guarantees. The project may be rewritten, paused or archived at any time.
 - Early stage: **no plugin and no release has been published yet.** The usage section below will be filled in once there is something real to install.
+
+### Compatibility
+
+- The plugins in this repository **only support OpenCode v2**; OpenCode v1 and earlier are **out of scope**.
+- Installing or loading them on v1 may fail with an error or silently do nothing, and such reports will not be handled.
+- If the supported range ever changes (for example widening to other versions), this README will be updated accordingly.
 
 ### Relationship to OpenCode
 
@@ -93,7 +107,7 @@ Accordingly, and explicitly:
 
 ### Install / Usage
 
-Not published yet. To be filled in.
+Not published yet. To be filled in. The plugins here require OpenCode v2 — see [Compatibility](#compatibility).
 
 ### Contributing
 
