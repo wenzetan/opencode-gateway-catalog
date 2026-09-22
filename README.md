@@ -74,6 +74,7 @@ Gateway metadata incomplete  → strict 模式下该模型会被跳过并给出 
 - **OpenCode 2.x**（使用官方 `@opencode/plugin` 2.x ABI；本项目不使用、也不支持 OpenCode 1.x 的 "v2 Promise API"）
 - 一个 OpenAI-compatible Gateway，暴露 `GET /v1/models`
 - 插件本身无运行时 npm 依赖；构建产物为 ESM
+- 从 Git 安装无需本地构建：CI 构建产物发布在 `dist` 分支与 GitHub Releases（见[安装](#安装)）
 
 开发与测试记录：**Tested with OpenCode 2.0.12**（`opencode --version` 输出 `v2.0.12`）。
 
@@ -81,11 +82,16 @@ Gateway metadata incomplete  → strict 模式下该模型会被跳过并给出 
 
 ## 安装
 
-### 从 npm 安装（推荐）
+### 从 Git 仓库安装（推荐）
+
+本插件暂未发布到 npm。推送 `v*` tag 时，GitHub Actions 会自动构建，并把产物发布到 `dist` 分支与 GitHub Releases：
 
 ```bash
-opencode plugin add opencode-gateway-catalog
+opencode plugin add "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist"
 ```
+
+> 国内网络访问 GitHub 受限时，可使用镜像/代理加速，参见：
+> <https://help.mirrors.cernet.edu.cn/github-raw/>
 
 或手工在 `opencode.json` 中声明：
 
@@ -94,7 +100,7 @@ opencode plugin add opencode-gateway-catalog
   "$schema": "https://opencode.ai/config.json",
   "plugins": [
     {
-      "package": "opencode-gateway-catalog",
+      "package": "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist",
       "options": {
         "adapter": "omniroute",
         "providerId": "omniroute",
@@ -107,7 +113,16 @@ opencode plugin add opencode-gateway-catalog
 }
 ```
 
-### 本地开发安装（不发布也能用）
+### 离线安装（Release 压缩包）
+
+从 [GitHub Releases](https://github.com/wenzetan/opencode-gateway-catalog/releases) 下载 `opencode-gateway-catalog.tgz` 解压，然后指向解压出的构建产物目录：
+
+```bash
+tar -xzf opencode-gateway-catalog.tgz
+# "package": "file:///ABSOLUTE/PATH/TO/package/dist"
+```
+
+### 本地开发安装
 
 ```bash
 npm install
@@ -128,7 +143,7 @@ npm run build
   "$schema": "https://opencode.ai/config.json",
   "plugins": [
     {
-      "package": "opencode-gateway-catalog",
+      "package": "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist",
       "options": {
         "adapter": "omniroute", // 默认 "omniroute"
         "providerId": "omniroute", // 默认 "omniroute"
@@ -351,7 +366,7 @@ $XDG_CACHE_HOME/opencode-gateway-catalog/<providerId>-<hash>.json
       "models": { "kr/claude-sonnet-5": {} },
     },
   },
-  "plugins": [{ "package": "opencode-gateway-catalog", "options": { "providerId": "omniroute" } }],
+  "plugins": [{ "package": "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist", "options": { "providerId": "omniroute" } }],
 }
 ```
 
@@ -490,6 +505,18 @@ npm install
 npm run build          # tsc -> dist/
 npm test               # unit + integration + host-contract
 npm pack --dry-run     # 检查发布内容
+```
+
+### 发布
+
+推送 `v*` tag 触发 [`.github/workflows/release.yml`](.github/workflows/release.yml)：
+
+- 构建并把 `opencode-gateway-catalog.tgz` 上传到 GitHub Release；
+- 把 `dist/` 构建产物推送到 `dist` 分支，供 `opencode plugin add "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist"` 安装。
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 项目结构：

@@ -57,7 +57,7 @@
     "test:integration": "node --import tsx --test test/integration/*.test.ts",
     "test:host-contract": "node --import tsx --test test/host-contract/*.test.ts",
     "test": "npm run test:unit && npm run test:integration && npm run test:host-contract",
-    "prepack": "npm run build"
+    "prepare": "npm run build"
   },
   "publishConfig": {
     "access": "public"
