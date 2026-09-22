@@ -87,11 +87,15 @@ Gateway metadata incomplete  → strict 模式下该模型会被跳过并给出 
 本插件暂未发布到 npm。推送 `v*` tag 时，GitHub Actions 会自动构建，并把产物发布到 `dist` 分支与 GitHub Releases：
 
 ```bash
+# 直连 GitHub
 opencode plugin add "git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist"
+
+# 国内网络：在完整 GitHub 地址前拼接代理前缀（示例：gh-proxy.com）
+opencode plugin add "git+https://gh-proxy.com/https://github.com/wenzetan/opencode-gateway-catalog.git#dist"
 ```
 
-> 国内网络访问 GitHub 受限时，可使用镜像/代理加速，参见：
-> <https://help.mirrors.cernet.edu.cn/github-raw/>
+> 更多镜像/代理服务参见 <https://help.mirrors.cernet.edu.cn/github-raw/>；
+> 若你有校内/公司镜像，把上例中的 `gh-proxy.com` 前缀替换为你的镜像地址即可。
 
 或手工在 `opencode.json` 中声明：
 
