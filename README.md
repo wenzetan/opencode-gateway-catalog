@@ -82,9 +82,121 @@ Gateway metadata incomplete  → strict 模式下该模型会被跳过并给出 
 
 ## 安装
 
-### 从 Git 仓库安装（推荐）
+### 快速开始（复制即用）
 
-本插件暂未发布到 npm。推送 `v*` tag 时，GitHub Actions 会自动构建，并把产物发布到 `dist` 分支与 GitHub Releases：
+适用于 Linux / macOS 的 bash / zsh（需已安装 OpenCode 2.x 与 Node.js）。把第 1 步的 API key 换成你自己的，然后整段复制执行：
+
+```bash
+# ===== 1) 按需修改以下几项 =====
+export OMNIROUTE_API_KEY="sk-REPLACE_ME"                    # 你的 OmniRoute API key
+GW_BASEURL="${GW_BASEURL:-http://127.0.0.1:20128}"           # 网关地址（带不带 /v1 均可）
+GW_PROVIDER_ID="${GW_PROVIDER_ID:-omniroute}"                # provider/模型前缀
+GW_PROVIDER_NAME="${GW_PROVIDER_NAME:-OmniRoute}"            # 显示名
+GW_APIKEY_ENV="${GW_APIKEY_ENV:-OMNIROUTE_API_KEY}"          # key 所在的环境变量名
+
+# ===== 2) 选择插件来源 =====
+PACKAGE="git+https://github.com/wenzetan/opencode-gateway-catalog.git#dist"
+# 国内网络改用镜像（二选一）：
+# PACKAGE="git+https://gh-proxy.com/https://github.com/wenzetan/opencode-gateway-catalog.git#dist"
+
+# ===== 3) 安装插件，并从输出中定位全局配置文件 =====
+out="$(opencode plugin add "$PACKAGE" 2>&1)"; printf '%s\n' "$out"
+CONFIG_FILE="$(printf '%s\n' "$out" | grep -oE '/[^[:space:]]*opencode\.json' | head -1)"
+CONFIG_FILE="${CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.json}"
+[ -f "$CONFIG_FILE" ] && cp -f "$CONFIG_FILE" "$CONFIG_FILE.bak"
+
+# ===== 4) 写入插件 options（保留其他配置；原文件已备份为 .bak） =====
+CONFIG_FILE="$CONFIG_FILE" PACKAGE="$PACKAGE" GW_BASEURL="$GW_BASEURL" \
+GW_PROVIDER_ID="$GW_PROVIDER_ID" GW_PROVIDER_NAME="$GW_PROVIDER_NAME" \
+GW_APIKEY_ENV="$GW_APIKEY_ENV" node <<'NODE'
+const fs = require("node:fs");
+const path = require("node:path");
+
+function stripJsonc(text) {
+  let out = "", inString = false, escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i + 1];
+    if (inString) {
+      out += c;
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') { inString = true; out += c; continue; }
+    if (c === "/" && next === "/") { while (i < text.length && text[i] !== "\n") i++; out += "\n"; continue; }
+    if (c === "/" && next === "*") { i += 2; while (i < text.length && !(text[i] === "*" && text[i + 1] === "/")) i++; i++; continue; }
+    if ((c === "}" || c === "]") && !inString) out = out.replace(/,\s*$/, "");
+    out += c;
+  }
+  return out;
+}
+
+const file = process.env.CONFIG_FILE;
+let config = {};
+if (fs.existsSync(file)) config = JSON.parse(stripJsonc(fs.readFileSync(file, "utf8")));
+const plugins = Array.isArray(config.plugins) ? config.plugins : [];
+const isCatalog = (item) => {
+  const name = typeof item === "string" ? item : item && item.package;
+  return typeof name === "string" && name.includes("opencode-gateway-catalog");
+};
+const index = plugins.findIndex(isCatalog);
+const previous = index >= 0 && plugins[index] && typeof plugins[index] === "object" ? plugins[index].options ?? {} : {};
+const entry = {
+  package: process.env.PACKAGE,
+  options: {
+    ...previous,
+    baseURL: process.env.GW_BASEURL,
+    providerId: process.env.GW_PROVIDER_ID,
+    providerName: process.env.GW_PROVIDER_NAME,
+    apiKeyEnv: process.env.GW_APIKEY_ENV,
+  },
+};
+if (index >= 0) plugins[index] = entry; else plugins.push(entry);
+config.plugins = plugins;
+if (!config.$schema) config.$schema = "https://opencode.ai/config.json";
+fs.mkdirSync(path.dirname(file), { recursive: true });
+fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");
+console.log("配置已写入:", file);
+NODE
+
+# ===== 5) 重启 OpenCode 后台服务（必须：配置/环境变量变更后不重启不生效） =====
+opencode service restart
+
+# ===== 6) 验证（首次安装/刷新需要几秒，自动等待） =====
+for _ in $(seq 1 10); do
+  opencode plugin list 2>/dev/null | grep -q "gateway.catalog" && break
+  sleep 3
+done
+opencode plugin list
+
+for _ in $(seq 1 10); do
+  MODELS="$(opencode models 2>/dev/null | grep -E "^${GW_PROVIDER_ID}/" || true)"
+  [ -n "$MODELS" ] && break
+  sleep 3
+done
+if [ -n "$MODELS" ]; then
+  printf '%s\n' "$MODELS"
+else
+  echo "暂未发现模型：请确认网关可访问且 API key 正确，然后 opencode service restart 重试"
+fi
+```
+
+**这段命令做了什么：**
+
+- `opencode plugin add` 下载并安装插件（构建产物由 CI 在推送 `v*` tag 时生成）；
+- 把插件项以对象形式（含 `options`）合并进全局 `opencode.json`，原配置备份为 `opencode.json.bak`；
+- `opencode service restart` 重启 OpenCode 后台服务。**这一步是必须的**：后台服务在启动时固定配置与环境变量，不重启则新的 API key / options 不会生效；
+- 最后自动等待并验证插件加载与模型发现。
+
+> - `baseURL` 带不带 `/v1` 均可（插件会自动解析，见[URL 处理](#url-处理)）。
+> - API key 只放进环境变量，不会写入配置文件；需要持久化可写入 `~/.zshrc`（或 `~/.bashrc`），保存后重开终端并再次执行 `opencode service restart`。
+
+### 从 Git 仓库手动安装
+
+本插件暂未发布到 npm。推送 `v*` tag 时，GitHub Actions 会自动构建，并把产物发布到 `dist` 分支与 GitHub Releases。
+
+**1. 安装插件包（二选一）：**
 
 ```bash
 # 直连 GitHub
@@ -97,7 +209,7 @@ opencode plugin add "git+https://gh-proxy.com/https://github.com/wenzetan/openco
 > 更多镜像/代理服务参见 <https://help.mirrors.cernet.edu.cn/github-raw/>；
 > 若你有校内/公司镜像，把上例中的 `gh-proxy.com` 前缀替换为你的镜像地址即可。
 
-或手工在 `opencode.json` 中声明：
+**2. 在全局 `opencode.json` 中补上 `options`**（`opencode plugin add` 只写入包名；缺少 `baseURL` 插件会加载失败）：
 
 ```jsonc
 {
@@ -115,6 +227,19 @@ opencode plugin add "git+https://gh-proxy.com/https://github.com/wenzetan/openco
     },
   ],
 }
+```
+
+**3. 重启 OpenCode 后台服务**（配置或环境变量变更后必须执行）：
+
+```bash
+opencode service restart
+```
+
+**4. 验证：**
+
+```bash
+opencode plugin list                  # 应显示 gateway.catalog
+opencode models | grep '^omniroute/'  # 应显示网关模型（providerId 可自定义）
 ```
 
 ### 离线安装（Release 压缩包）
@@ -141,6 +266,8 @@ npm run build
 ---
 
 ## 配置
+
+> 修改 `options` 后必须执行 `opencode service restart`，后台服务重启后插件才会使用新配置。
 
 ```jsonc
 {
