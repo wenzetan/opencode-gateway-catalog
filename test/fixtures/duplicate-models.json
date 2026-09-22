@@ -1,0 +1,7 @@
+{
+  "object": "list",
+  "data": [
+    { "id": "vendor/dup", "context_length": 1000, "max_output_tokens": 100, "capabilities": { "tool_calling": true }, "input_modalities": ["text"], "output_modalities": ["text"] },
+    { "id": "vendor/dup", "context_length": 2000, "max_output_tokens": 200, "capabilities": { "tool_calling": false }, "input_modalities": ["text"], "output_modalities": ["text"] }
+  ]
+}

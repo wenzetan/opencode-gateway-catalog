@@ -1,0 +1,65 @@
+{
+  "name": "opencode-gateway-catalog",
+  "version": "0.1.0",
+  "description": "OpenCode 2 plugin that discovers models from an OpenAI-compatible gateway (OmniRoute first) and injects the gateway-provided metadata into the OpenCode provider/model catalog. The gateway is the only source of truth: no models.dev enrichment, no model-name heuristics.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "opencode-2",
+    "gateway",
+    "catalog",
+    "models",
+    "omniroute",
+    "openai-compatible"
+  ],
+  "peerDependencies": {
+    "@opencode/plugin": ">=2.0.12 <3"
+  },
+  "peerDependenciesMeta": {
+    "@opencode/plugin": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opencode/plugin": "2.0.12",
+    "@types/node": "^22.14.0",
+    "oxlint": "^1.16.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "oxlint --deny-warnings src test",
+    "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/*.mjs\" \"*.json\" \".github/**/*.yml\"",
+    "test:unit": "node --import tsx --test test/unit/*.test.ts",
+    "test:integration": "node --import tsx --test test/integration/*.test.ts",
+    "test:host-contract": "node --import tsx --test test/host-contract/*.test.ts",
+    "test": "npm run test:unit && npm run test:integration && npm run test:host-contract",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

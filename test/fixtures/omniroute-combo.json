@@ -1,0 +1,15 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "auto/best-vision",
+      "context_length": 1050000,
+      "max_input_tokens": 1050000,
+      "max_output_tokens": 1048576,
+      "capabilities": {
+        "tool_calling": true,
+        "reasoning": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "vendor/vision-flag-only",
+      "name": "Vision Flag Only",
+      "context_length": 100000,
+      "max_output_tokens": 10000,
+      "capabilities": { "vision": true, "tool_calling": true },
+      "output_modalities": ["text"]
+    }
+  ]
+}

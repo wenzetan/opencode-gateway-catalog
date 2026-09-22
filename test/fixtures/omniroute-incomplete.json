@@ -1,0 +1,28 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "vendor/missing-output",
+      "name": "Missing Output",
+      "context_length": 100000,
+      "capabilities": { "tool_calling": true },
+      "input_modalities": ["text"],
+      "output_modalities": ["text"]
+    },
+    {
+      "id": "vendor/missing-modalities",
+      "name": "Missing Modalities",
+      "context_length": 200000,
+      "max_output_tokens": 32000,
+      "capabilities": { "tool_calling": true }
+    },
+    {
+      "id": "vendor/missing-tools",
+      "name": "Missing Tools",
+      "context_length": 200000,
+      "max_output_tokens": 32000,
+      "input_modalities": ["text"],
+      "output_modalities": ["text"]
+    }
+  ]
+}

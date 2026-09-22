@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Minimum supported OpenCode 2.x release and the latest 2.x line.
+        opencode: ["2.0.12", "^2"]
+    env:
+      OPENCODE_BIN: opencode
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format
+
+      - name: Build
+        run: npm run build
+
+      - name: Install OpenCode CLI
+        run: npm install --global "@opencode/cli@${{ matrix.opencode }}"
+
+      - name: Record OpenCode version
+        run: opencode --version
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Integration tests (real OpenCode 2 + mock gateway)
+        run: npm run test:integration
+
+      - name: Host contract tests (ctx.model.list probe)
+        run: npm run test:host-contract
+
+      - name: CLI smoke (plugin list / models)
+        run: |
+          export OPENCODE_CONFIG_DIR="$(mktemp -d)"
+          opencode plugin list
+          opencode models | head -n 20
+
+      - name: Package dry run
+        run: npm pack --dry-run

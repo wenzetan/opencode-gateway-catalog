@@ -1,0 +1,32 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "kr/claude-sonnet-5",
+      "object": "model",
+      "owned_by": "kiro",
+      "name": "kr/Claude Sonnet 5",
+      "family": "claude-sonnet",
+      "context_length": 1000000,
+      "max_input_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "capabilities": {
+        "vision": true,
+        "tool_calling": true,
+        "reasoning": true,
+        "thinking": true,
+        "supportsThinking": true,
+        "effort_tiers": ["none", "low", "medium", "high", "xhigh"]
+      },
+      "input_modalities": ["text", "image"],
+      "output_modalities": ["text"],
+      "pricing": {
+        "input": 3,
+        "output": 15,
+        "cached": 1.5,
+        "reasoning": 15,
+        "cache_creation": 3
+      }
+    }
+  ]
+}
