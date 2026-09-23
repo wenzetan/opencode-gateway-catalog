@@ -5,7 +5,8 @@
  * first), validates it strictly and injects it into the OpenCode provider/model
  * catalog through `ctx.provider.transform`. The gateway is the only source of
  * metadata: this plugin never uses models.dev, never infers capabilities from
- * model names and never synthesizes reasoning variants.
+ * model names and never synthesizes reasoning variants (gateway-provided
+ * `effort_tiers` are mapped verbatim).
  *
  * The module only imports *types* from `@opencode/plugin`, so the published
  * artifact has no runtime dependency on the OpenCode plugin package. The host

@@ -164,6 +164,10 @@ test("catalog metadata, inference routing, auth, hot refresh and outage LKG", as
     assert.deepEqual(registeredA["cost"], [
       { input: 1.5, output: 2.5, cache: { read: 0.5, write: 3 } },
     ]);
+    assert.deepEqual(registeredA["variants"], [
+      { id: "low", settings: { reasoningEffort: "low" } },
+      { id: "high", settings: { reasoningEffort: "high" } },
+    ]);
 
     // goal field "max_output_tokens" is required; incomplete models are skipped
     assert.equal(findModel(models, "vendor/missing-output"), undefined);

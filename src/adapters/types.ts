@@ -34,6 +34,9 @@ export interface GatewayModel {
   readonly reasoning?: boolean;
   readonly thinking?: boolean;
 
+  /** Gateway-provided reasoning effort levels, in gateway order. Never synthesized. */
+  readonly effortTiers?: readonly string[];
+
   readonly pricing?: GatewayPricing;
 
   /** Explicit surface hints from the gateway; only used when the gateway provides them. */

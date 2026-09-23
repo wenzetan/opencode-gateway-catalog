@@ -309,7 +309,26 @@ test("catalog mapping is deterministically sorted by id", () => {
   );
 });
 
-test("variants are always empty and released timestamp is the structural default", () => {
+test("effort_tiers map to reasoning variants verbatim", () => {
+  const info = mapped({
+    id: "vendor/reasoner",
+    contextLength: 1,
+    maxOutputTokens: 1,
+    toolCalling: true,
+    inputModalities: ["text"],
+    outputModalities: ["text"],
+    effortTiers: ["none", "low", "medium", "high", "xhigh"],
+  });
+  assert.deepEqual(info.variants, [
+    { id: "none", settings: { reasoningEffort: "none" } },
+    { id: "low", settings: { reasoningEffort: "low" } },
+    { id: "medium", settings: { reasoningEffort: "medium" } },
+    { id: "high", settings: { reasoningEffort: "high" } },
+    { id: "xhigh", settings: { reasoningEffort: "xhigh" } },
+  ]);
+});
+
+test("no effort_tiers means no variants (never synthesized)", () => {
   const info = mapped({
     id: "vendor/plain",
     contextLength: 1,
@@ -317,9 +336,27 @@ test("variants are always empty and released timestamp is the structural default
     toolCalling: true,
     inputModalities: ["text"],
     outputModalities: ["text"],
+    reasoning: true,
+    thinking: true,
   });
   assert.deepEqual(info.variants, []);
   assert.equal(info.time.released, 0);
   assert.equal(info.status, "active");
   assert.equal(info.enabled, true);
+});
+
+test("duplicate effort tiers collapse to unique variant ids", () => {
+  const info = mapped({
+    id: "vendor/dupe",
+    contextLength: 1,
+    maxOutputTokens: 1,
+    toolCalling: true,
+    inputModalities: ["text"],
+    outputModalities: ["text"],
+    effortTiers: ["low", "low", "high"],
+  });
+  assert.deepEqual(
+    info.variants.map((variant) => variant.id),
+    ["low", "high"],
+  );
 });

@@ -57,7 +57,7 @@ The configured gateway is the source of truth.
 - 根据模型名称推断能力（`vision`、`gpt`、`claude`、`qwen`、`kimi`、`reasoning`、`coder`……）
 - 补全缺失的 context / output / modalities / tools / pricing
 - 用 200k context、32k output、`tools: true`、`image` 等乐观默认值注册模型
-- 根据 `effort_tiers` 生成 reasoning variants
+- 根据 `effort_tiers` 凭空生成 reasoning variants（只会把 Gateway 显式提供的 `effort_tiers` 原样映射为 variants）
 - 把 OmniRoute 伪装成 vLLM / LM Studio / Ollama
 
 后果很直接：
@@ -419,18 +419,19 @@ OpenCode 2 model catalog
 | `pricing.output`                | `cost[].output`       | 同上                                                      |
 | `pricing.cached`                | `cost[].cache.read`   | 同上                                                      |
 | `pricing.cache_creation`        | `cost[].cache.write`  | 同上                                                      |
+| `capabilities.effort_tiers`     | `variants[]`          | 每个 tier 一个 variant：`id` = tier，`settings.reasoningEffort` = tier（原样映射，不新增档位） |
 | `supported_endpoints`           | surface 过滤          | 不含 chat/completions 时跳过                              |
 | `output_modalities` 不含 `text` | surface 过滤          | 例如 image-only 模型会被跳过                              |
 
 明确不映射（保留在内部 canonical model 中或忽略）：
 
-- `capabilities.vision` / `reasoning` / `thinking` / `supportsThinking` / `effort_tiers`（OpenCode 没有语义完全一致的字段；第一版不生成 variants）
+- `capabilities.vision` / `reasoning` / `thinking` / `supportsThinking`（OpenCode 没有语义完全一致的布尔字段；variants 只由显式的 `effort_tiers` 生成）
 - `pricing.reasoning`
 - `created` / `release_date` / `knowledge_cutoff` 等
 
 `variants: []`、`time.released: 0`、`cost: []` 属于结构性默认值：
 
-- `variants: []` —— 本插件没有定义 variant
+- `variants: []` —— Gateway 没有提供 `capabilities.effort_tiers`（本插件不凭空造档位）
 - `cost: []` —— Gateway 没有提供足够 pricing 信息（**不是免费**）
 - `time.released: 0` —— Gateway 未提供可映射的发布时间
 
@@ -470,12 +471,18 @@ $XDG_CACHE_HOME/opencode-gateway-catalog/<providerId>-<hash>.json
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "adapter": "omniroute",
   "providerId": "omniroute",
   "baseURL": "http://127.0.0.1:20128/v1",
   "fetchedAt": "2026-09-22T06:42:17.000Z",
-  "models": [{ "id": "kr/claude-sonnet-5", "context_length": 1000000 }]
+  "models": [
+    {
+      "id": "kr/claude-sonnet-5",
+      "context_length": 1000000,
+      "effort_tiers": ["none", "low", "medium", "high", "xhigh"]
+    }
+  ]
 }
 ```
 
@@ -623,7 +630,7 @@ v0.1 明确不做：
 - 模型名称 heuristic、metadata 补全
 - LLM routing / fallback / load balancing / health routing
 - chat proxy、SSE parser、tool parser、reasoning parser
-- reasoning variants 合成、model alias 生成
+- reasoning variants 合成（仅做 `effort_tiers` → variants 的原样映射）、model alias 生成
 - 自动探测上游模型能力、修改 OmniRoute 配置
 - 把 Gateway 伪装成 vLLM / LM Studio / Ollama
 

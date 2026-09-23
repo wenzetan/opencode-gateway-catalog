@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { cacheFileName, DiskCache, serializeCachedModels } from "../../src/cache.js";
+import { cacheFileName, CACHE_VERSION, DiskCache, serializeCachedModels } from "../../src/cache.js";
 import type { GatewayModel } from "../../src/adapters/types.js";
 import { createLogger, type LogLevel } from "../../src/logger.js";
 
@@ -42,6 +42,7 @@ const models: GatewayModel[] = [
     toolCalling: true,
     inputModalities: ["text", "image"],
     outputModalities: ["text"],
+    effortTiers: ["low", "high"],
     pricing: { input: 1, output: 2, cached: 0.5, cacheCreation: 3 },
   },
   {
@@ -96,7 +97,7 @@ test("identity mismatch inside the cache file is ignored", async () => {
     await writeFile(
       join(dir, cacheFileName(identity)),
       JSON.stringify({
-        version: 1,
+        version: CACHE_VERSION,
         adapter: identity.adapter,
         providerId: "someone-else",
         baseURL: identity.baseURL,
@@ -116,7 +117,7 @@ test("invalid model entries invalidate the cached catalog", async () => {
     await writeFile(
       join(dir, cacheFileName(identity)),
       JSON.stringify({
-        version: 1,
+        version: CACHE_VERSION,
         adapter: identity.adapter,
         providerId: identity.providerId,
         baseURL: identity.baseURL,

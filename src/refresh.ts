@@ -59,6 +59,12 @@ function canonicalModel(model: Model.Info): unknown {
       input: [...model.capabilities.input],
       output: [...model.capabilities.output],
     },
+    variants: model.variants.map((variant) => ({
+      id: String(variant.id),
+      settings: variant.settings ?? null,
+      headers: variant.headers ?? null,
+      body: variant.body ?? null,
+    })),
     limit: {
       context: model.limit.context,
       input: model.limit.input ?? null,

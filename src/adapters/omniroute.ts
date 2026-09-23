@@ -53,7 +53,13 @@ function readField<T>(
 function parseCapabilities(
   state: ParseFieldsState,
   raw: unknown,
-): { toolCalling?: boolean; vision?: boolean; reasoning?: boolean; thinking?: boolean } {
+): {
+  toolCalling?: boolean;
+  vision?: boolean;
+  reasoning?: boolean;
+  thinking?: boolean;
+  effortTiers?: string[];
+} {
   if (raw === undefined) return {};
   if (!isRecord(raw)) {
     invalid(state, "capabilities", "must be an object");
@@ -66,6 +72,12 @@ function parseCapabilities(
     thinking:
       readField(state, raw["thinking"], "capabilities.thinking", readBoolean) ??
       readField(state, raw["supportsThinking"], "capabilities.supportsThinking", readBoolean),
+    effortTiers: readField(
+      state,
+      raw["effort_tiers"],
+      "capabilities.effort_tiers",
+      readStringArray,
+    ),
   };
 }
 
@@ -122,6 +134,7 @@ function parseModel(item: Record<string, unknown>, id: string, issues: ModelIssu
     vision: capabilities.vision,
     reasoning: capabilities.reasoning,
     thinking: capabilities.thinking,
+    effortTiers: capabilities.effortTiers,
     pricing: parsePricing(state, item["pricing"]),
     supportedEndpoints: readField(
       state,

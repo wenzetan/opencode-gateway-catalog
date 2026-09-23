@@ -5,6 +5,7 @@
  *  - no models.dev lookup
  *  - no model-name heuristics
  *  - no capability/limit/pricing guesses
+ *  - no synthesized variants (only explicit gateway `effort_tiers` are mapped)
  *
  * Required OpenCode fields that the gateway does not provide cause the model to
  * be skipped (the default). The optimistic defaults that OpenCode applies to
@@ -173,6 +174,34 @@ function buildCost(model: GatewayModel): Model.Cost[] {
   ];
 }
 
+type Variant = Model.Info["variants"][number];
+
+/**
+ * Maps gateway-provided reasoning effort levels (`capabilities.effort_tiers`)
+ * to OpenCode variants, one per tier, verbatim: `id` is the tier name and
+ * `settings.reasoningEffort` is set to the same value. OpenCode's
+ * OpenAI-compatible provider serializes `reasoningEffort` to `reasoning_effort`
+ * on the wire, so the gateway receives exactly the tier it advertised.
+ *
+ * No tiers are invented: a gateway that omits `effort_tiers` yields `[]`.
+ * Duplicate tiers are collapsed so variant ids stay unique.
+ */
+function buildVariants(model: GatewayModel): Variant[] {
+  const tiers = model.effortTiers;
+  if (tiers === undefined || tiers.length === 0) return [];
+  const seen = new Set<string>();
+  const variants: Variant[] = [];
+  for (const tier of tiers) {
+    if (seen.has(tier)) continue;
+    seen.add(tier);
+    variants.push({
+      id: tier as Variant["id"],
+      settings: { reasoningEffort: tier },
+    });
+  }
+  return variants;
+}
+
 export function mapGatewayModel(
   model: GatewayModel,
   options: MapOptions,
@@ -222,9 +251,9 @@ export function mapGatewayModel(
       input: [...(model.inputModalities as readonly string[])],
       output: [...(model.outputModalities as readonly string[])],
     },
-    // Structural defaults only: no variants are defined by this plugin and
-    // `cost: []` means "not enough information", not "free".
-    variants: [],
+    // Variants come from the gateway's explicit `effort_tiers` only; `cost: []`
+    // means "not enough information", not "free".
+    variants: buildVariants(model),
     time: { released: 0 },
     cost: buildCost(model),
     status: "active",

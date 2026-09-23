@@ -78,6 +78,19 @@ function expectedCost(pricing) {
   return [];
 }
 
+function expectedVariants(item) {
+  const tiers = stringArray(item.capabilities?.effort_tiers);
+  if (tiers === undefined || tiers.length === 0) return [];
+  const seen = new Set();
+  const variants = [];
+  for (const tier of tiers) {
+    if (seen.has(tier)) continue;
+    seen.add(tier);
+    variants.push({ id: tier, settings: { reasoningEffort: tier } });
+  }
+  return variants;
+}
+
 function unsupportedReason(raw) {
   const context = positiveInt(raw.context_length);
   const output = positiveInt(raw.max_output_tokens);
@@ -132,7 +145,7 @@ for (const model of registered) {
     ["capabilities.input", model.capabilities?.input, stringArray(item.input_modalities)],
     ["capabilities.output", model.capabilities?.output, stringArray(item.output_modalities)],
     ["cost", model.cost, expectedCost(item.pricing)],
-    ["variants", model.variants, []],
+    ["variants", model.variants, expectedVariants(item)],
   ];
   for (const [field, actual, expected] of checks) {
     if (!equal(actual, expected)) {

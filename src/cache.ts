@@ -27,7 +27,7 @@ import {
   readStringArray,
 } from "./validation.js";
 
-export const CACHE_VERSION = 1;
+export const CACHE_VERSION = 2;
 
 export interface CacheIdentity {
   readonly adapter: string;
@@ -36,7 +36,7 @@ export interface CacheIdentity {
 }
 
 export interface CacheEntry {
-  readonly version: 1;
+  readonly version: typeof CACHE_VERSION;
   readonly adapter: string;
   readonly providerId: string;
   readonly baseURL: string;
@@ -75,6 +75,7 @@ function parseCachedModel(value: unknown): GatewayModel | undefined {
   const vision = readBoolean(value["vision"]);
   const reasoning = readBoolean(value["reasoning"]);
   const thinking = readBoolean(value["thinking"]);
+  const effortTiers = readStringArray(value["effort_tiers"]);
   const supportedEndpoints = readStringArray(value["supported_endpoints"]);
   const surface = readNonEmptyString(value["surface"]);
   const type = readNonEmptyString(value["type"]);
@@ -109,6 +110,7 @@ function parseCachedModel(value: unknown): GatewayModel | undefined {
     ...(vision !== undefined ? { vision } : {}),
     ...(reasoning !== undefined ? { reasoning } : {}),
     ...(thinking !== undefined ? { thinking } : {}),
+    ...(effortTiers !== undefined ? { effortTiers } : {}),
     ...(pricing !== undefined ? { pricing } : {}),
     ...(supportedEndpoints !== undefined ? { supportedEndpoints } : {}),
     ...(surface !== undefined ? { surface } : {}),
@@ -138,6 +140,7 @@ export function serializeCachedModels(models: readonly GatewayModel[]): unknown[
     ...(model.vision !== undefined ? { vision: model.vision } : {}),
     ...(model.reasoning !== undefined ? { reasoning: model.reasoning } : {}),
     ...(model.thinking !== undefined ? { thinking: model.thinking } : {}),
+    ...(model.effortTiers !== undefined ? { effort_tiers: [...model.effortTiers] } : {}),
     ...(model.pricing !== undefined
       ? {
           pricing: {

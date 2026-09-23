@@ -26,6 +26,7 @@ test("full model metadata is parsed verbatim", () => {
   assert.equal(model.vision, true);
   assert.equal(model.reasoning, true);
   assert.equal(model.thinking, true);
+  assert.deepEqual(model.effortTiers, ["none", "low", "medium", "high", "xhigh"]);
   assert.deepEqual(model.pricing, {
     input: 3,
     output: 15,

@@ -30,7 +30,7 @@ test("ctx.model.list()/ctx.provider.list() observe exact injected metadata", asy
         context_length: 12_345,
         max_input_tokens: 12_000,
         max_output_tokens: 1_000,
-        capabilities: { tool_calling: true },
+        capabilities: { tool_calling: true, effort_tiers: ["low", "high"] },
         input_modalities: ["text", "image"],
         output_modalities: ["text"],
         pricing: { input: 0.5, output: 1.5, cached: 0.1, cache_creation: 0.2 },
@@ -113,7 +113,10 @@ test("ctx.model.list()/ctx.provider.list() observe exact injected metadata", asy
     assert.deepEqual(model["cost"], [
       { input: 0.5, output: 1.5, cache: { read: 0.1, write: 0.2 } },
     ]);
-    assert.deepEqual(model["variants"], []);
+    assert.deepEqual(model["variants"], [
+      { id: "low", settings: { reasoningEffort: "low" } },
+      { id: "high", settings: { reasoningEffort: "high" } },
+    ]);
     assert.equal(model["enabled"], true);
     assert.equal(model["status"], "active");
 

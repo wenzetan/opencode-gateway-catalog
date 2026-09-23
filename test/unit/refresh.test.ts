@@ -162,6 +162,23 @@ test("refresh adds and removes models and triggers reload only on change", async
   );
 });
 
+test("changing only effort tiers triggers a reload", async () => {
+  const h = harness({ models: [model("vendor/a")] });
+  await h.controller.initialize();
+
+  h.fake.setModels([model("vendor/a", { effortTiers: ["low", "high"] })]);
+  await h.controller.refresh("timer");
+  assert.equal(h.reloadCount(), 1, "variant change must trigger a reload");
+  assert.deepEqual(
+    h.controller.getState().models[0]?.variants.map((variant) => String(variant.id)),
+    ["low", "high"],
+  );
+
+  // Same variants again must not reload.
+  await h.controller.refresh("timer");
+  assert.equal(h.reloadCount(), 1);
+});
+
 test("malformed refresh payload keeps last-known-good (integrity error)", async () => {
   const h = harness({ models: [model("vendor/a")] });
   await h.controller.initialize();
