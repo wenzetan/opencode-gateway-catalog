@@ -1,0 +1,37 @@
+{
+  "name": "opencode-gateway-catalog",
+  "version": "0.1.2",
+  "description": "OpenCode 2 plugin that discovers models from an OpenAI-compatible gateway (OmniRoute first) and injects the gateway-provided metadata into the OpenCode provider/model catalog. The gateway is the only source of truth: no models.dev enrichment, no model-name heuristics.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "opencode-2",
+    "gateway",
+    "catalog",
+    "models",
+    "omniroute",
+    "openai-compatible"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
